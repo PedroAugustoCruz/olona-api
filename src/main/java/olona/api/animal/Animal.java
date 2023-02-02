@@ -21,10 +21,15 @@ public class Animal {
     private String nome;
     private BigDecimal preco;
 
+
+
     @Enumerated(EnumType.STRING)
     private Classificacao classificacao;
 
+    private boolean ativo = true;
+
     public Animal(DadosCadastroAnimal dados){
+        this.ativo = true;
         this.nome = dados.nome();
         this.preco = dados.preco();
         this.classificacao = dados.classificacao();
@@ -40,5 +45,9 @@ public class Animal {
         if(dados.classificacao() != null){
             this.classificacao = dados.classificacao();
         }
+    }
+
+    public void excluir() {
+        this.ativo = false;
     }
 }
