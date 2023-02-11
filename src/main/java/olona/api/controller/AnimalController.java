@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/animais")
@@ -20,16 +21,30 @@ public class AnimalController {
 
     @GetMapping
     public ResponseEntity<Page<DadosListagemAnimais>> listar(@PageableDefault(size = 10, sort = {"id"})Pageable paginacao) {
-       var page =  repository.findByAtivoTrue(paginacao).map(DadosListagemAnimais::new);
+       var page = repository.findByAtivoTrue(paginacao).map(DadosListagemAnimais::new);
 
        return ResponseEntity.ok(page);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity detalhar(@PathVariable Long id){
+        var animal = repository.getReferenceById(id);
+
+        return ResponseEntity.ok(new DadosDetalhamentoAnimal(animal));
+
+    }
 
     @PostMapping
     @Transactional
-    public void cadastrarAnimal(@RequestBody @Valid DadosCadastroAnimal dados){
-        repository.save(new Animal(dados));
+    public ResponseEntity cadastrarAnimal(@RequestBody @Valid DadosCadastroAnimal dados,  UriComponentsBuilder uriBuilder){
+        var animal = new Animal(dados);
+
+
+        var uri = uriBuilder.path("/animais/{id}").buildAndExpand(animal.getId()).toUri();
+
+        repository.save(animal);
+
+        return ResponseEntity.created(uri).body(new DadosDetalhamentoAnimal(animal));
     }
     @PutMapping
     @Transactional
